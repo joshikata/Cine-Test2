@@ -1,0 +1,103 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Explora el catálogo de películas y sus elencos.">
+    <title>Cartelera | Cine Archivo</title>
+    <link rel="stylesheet" href="{% static 'peliculas/css/catalogo.css' %}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="{% url 'peliculas' %}" aria-label="Cine Archivo, inicio">
+            <span class="brand-mark" aria-hidden="true">CA</span>
+            <span>CINE <strong>ARCHIVO</strong></span>
+        </a>
+        <nav class="navigation" aria-label="Navegación principal">
+            <a class="nav-link active" href="{% url 'peliculas' %}">Catálogo</a>
+            <a class="admin-link" href="{% url 'admin:index' %}">Administrar <span aria-hidden="true">↗</span></a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="intro">
+            <div class="intro-copy">
+                <p class="eyebrow"><span class="eyebrow-line"></span> UNA COLECCIÓN PARA VOLVER A VER</p>
+                <h1>Buenas historias.<br><span>En pantalla grande.</span></h1>
+                <p class="intro-text">Un pequeño archivo de películas, géneros y talentos que dejan huella.</p>
+            </div>
+            <div class="collection-stats" aria-label="Resumen del catálogo">
+                <div class="stat"><strong>{{ total_peliculas }}</strong><span>películas</span></div>
+                <div class="stat-divider"></div>
+                <div class="stat"><strong>{{ total_actores }}</strong><span>actores</span></div>
+            </div>
+        </section>
+
+        <section class="catalog" aria-labelledby="catalog-title">
+            <div class="catalog-heading">
+                <div>
+                    <p class="eyebrow">EL ARCHIVO</p>
+                    <h2 id="catalog-title">En cartelera</h2>
+                </div>
+                {% if peliculas %}
+                <label class="search-box">
+                    <span class="search-icon" aria-hidden="true">⌕</span>
+                    <span class="visually-hidden">Buscar películas</span>
+                    <input id="movie-search" type="search" placeholder="Buscar película, género o actor..." autocomplete="off">
+                    <kbd>/</kbd>
+                </label>
+                {% endif %}
+            </div>
+
+            {% if peliculas %}
+            <div class="movie-grid" id="movie-grid">
+                {% for pelicula in peliculas %}
+                <article class="movie-card" data-search="{{ pelicula.titulo }} {{ pelicula.genero.nombre }} {% for reparto in pelicula.peliculaactor_set.all %}{{ reparto.actor.nombre }} {% endfor %}">
+                    <div class="poster poster-{{ forloop.counter0|add:1 }}">
+                        <span class="poster-kicker">{{ pelicula.genero.nombre }}</span>
+                        <span class="poster-initial" aria-hidden="true">{{ pelicula.titulo|slice:":1"|upper }}</span>
+                        <span class="poster-caption">CINE ARCHIVO<br>EDICIÓN {{ pelicula.anio_estreno }}</span>
+                    </div>
+                    <div class="movie-info">
+                        <div class="movie-meta">
+                            <span>{{ pelicula.anio_estreno }}</span>
+                            <span class="meta-dot"></span>
+                            <span>{{ pelicula.duracion_minutos }} min</span>
+                            <span class="rating">{{ pelicula.clasificacion }}</span>
+                        </div>
+                        <h3>{{ pelicula.titulo }}</h3>
+                        <p class="synopsis">{{ pelicula.sinopsis }}</p>
+                        <div class="cast">
+                            <span class="cast-label">REPARTO</span>
+                            <div class="cast-list">
+                                {% for reparto in pelicula.peliculaactor_set.all %}
+                                <span class="cast-member">{{ reparto.actor.nombre }}</span>
+                                {% empty %}
+                                <span class="cast-empty">Reparto por anunciar</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            <p class="search-empty" id="search-empty" hidden>No encontramos películas que coincidan con tu búsqueda.</p>
+            {% else %}
+            <div class="empty-state">
+                <span class="empty-icon" aria-hidden="true">✦</span>
+                <h3>El archivo está por comenzar</h3>
+                <p>Aún no hay películas cargadas. Añade títulos desde el panel de administración.</p>
+                <a class="button-link" href="{% url 'admin:peliculas_pelicula_add' %}">Añadir una película <span aria-hidden="true">↗</span></a>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer class="footer">
+        <span>© {% now "Y" %} Cine Archivo</span>
+        <span>Hecho para quienes aman las películas <span class="footer-star" aria-hidden="true">✳</span></span>
+    </footer>
+    <script src="{% static 'peliculas/js/catalogo.js' %}" defer></script>
+</body>
+</html>
